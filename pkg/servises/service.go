@@ -1,0 +1,26 @@
+package service
+
+import (
+	"Skipper_cms_users/pkg/models"
+	"Skipper_cms_users/pkg/models/forms/inputForms"
+	"Skipper_cms_users/pkg/repository"
+)
+
+type Users interface {
+	GetUsers() ([]models.User, error)
+	GetRoles() ([]models.Role, error)
+	GetUserRoles(userId uint) ([]models.Role, error)
+	AddRoleToUser(userId uint, roleId uint) error
+	CreateUser(userData inputForms.SignUpUserForm) (models.User, error)
+	DeleteUserRole(userId uint, roleId uint) (models.User, error)
+}
+
+type Service struct {
+	Users
+}
+
+func NewService(repos *repository.Repository) *Service {
+	return &Service{
+		Users: NewUsersService(repos.Users),
+	}
+}

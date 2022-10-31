@@ -1,0 +1,254 @@
+definitions:
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
+  inputForms.AddUserRoleForm:
+    properties:
+      role_id:
+        type: integer
+      user_id:
+        type: integer
+    required:
+    - role_id
+    - user_id
+    type: object
+  inputForms.DeleteUserRole:
+    properties:
+      role_id:
+        type: integer
+      user_id:
+        type: integer
+    required:
+    - role_id
+    - user_id
+    type: object
+  inputForms.SignUpUserForm:
+    properties:
+      first_name:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      roles_ids:
+        items:
+          type: integer
+        type: array
+      second_name:
+        type: string
+    required:
+    - first_name
+    - password
+    - phone
+    - second_name
+    type: object
+  models.Role:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  models.User:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      email:
+        description: Base information
+        type: string
+      firstName:
+        type: string
+      id:
+        type: integer
+      patronymic:
+        type: string
+      phone:
+        type: string
+      role:
+        items:
+          $ref: '#/definitions/models.Role'
+        type: array
+      secondName:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  outputForms.ErrorAssignRole:
+    properties:
+      error:
+        type: string
+      user:
+        $ref: '#/definitions/models.User'
+    type: object
+  outputForms.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  outputForms.SuccessResponse:
+    properties:
+      status:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Methods for control users for skipper cms
+  title: Users service
+  version: "1.0"
+paths:
+  /roles:
+    get:
+      consumes:
+      - application/json
+      description: Получение списка всех ролей
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Role'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/outputForms.ErrorResponse'
+      security:
+      - BearerAuth: []
+      tags:
+      - Users
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Получение списка всех пользователей
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/outputForms.ErrorResponse'
+      security:
+      - BearerAuth: []
+      tags:
+      - Users
+  /users/add-role:
+    post:
+      consumes:
+      - application/json
+      description: Добавление роли сотруднику
+      parameters:
+      - description: query params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/inputForms.AddUserRoleForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/outputForms.SuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/outputForms.ErrorResponse'
+      security:
+      - BearerAuth: []
+      tags:
+      - Users
+  /users/delete-role:
+    delete:
+      consumes:
+      - application/json
+      description: Удаление роли пользователя
+      parameters:
+      - description: query params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/inputForms.DeleteUserRole'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/outputForms.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/outputForms.ErrorResponse'
+      security:
+      - BearerAuth: []
+      tags:
+      - Users
+  /users/register:
+    post:
+      consumes:
+      - application/json
+      description: Регистрация нового пользователя
+      parameters:
+      - description: query params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/inputForms.SignUpUserForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "206":
+          description: Partial Content
+          schema:
+            $ref: '#/definitions/outputForms.ErrorAssignRole'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/outputForms.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/outputForms.ErrorResponse'
+      security:
+      - BearerAuth: []
+      tags:
+      - Users
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
