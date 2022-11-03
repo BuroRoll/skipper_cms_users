@@ -8,7 +8,7 @@ COPY go.mod ./
 COPY go.sum ./
 RUN go mod download
 COPY ./pkg ./pkg
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /app pkg/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -a -installsuffix cgo -o /app pkg/main.go
 
 FROM scratch
 
