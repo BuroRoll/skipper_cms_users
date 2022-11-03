@@ -37,4 +37,5 @@ jobs:
             cd /home/buroroll/skipper_cms/skipper_cms_users
             docker stop skipper_cms_users
             docker rm skipper_cms_users
+            docker rmi --force skipper_cms_users
             docker run -d -p 8003:8080 --env-file .env --name skipper_cms_users --restart unless-stopped buroroll/skipper_cms_users:latest
