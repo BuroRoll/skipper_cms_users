@@ -117,6 +117,8 @@ func enforce(sub string, obj string, act string) (bool, error) {
 	policy := "./pkg/config/policy.csv"
 	absAuthModel, err := filepath.Abs(authModel)
 	absPolicy, err := filepath.Abs(policy)
+	fmt.Println(absAuthModel)
+	fmt.Println(absPolicy)
 	enforcer := casbin.NewEnforcer(absAuthModel, absPolicy)
 	err = enforcer.LoadPolicy()
 	if err != nil {
