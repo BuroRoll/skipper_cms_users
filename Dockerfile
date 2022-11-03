@@ -8,8 +8,8 @@ COPY go.mod ./
 COPY go.sum ./
 RUN go mod download
 COPY ./pkg ./pkg
-RUN chmod a+x ./pkg/config/auth_model.conf
-RUN chmod a+x ./pkg/config/policy.csv
+RUN chmod a+x /app/pkg/config/auth_model.conf
+RUN chmod a+x /app/pkg/config/policy.csv
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /app pkg/main.go
 
 FROM scratch
