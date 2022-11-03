@@ -89,7 +89,7 @@ const docTemplate = `{
             }
         },
         "/users/add-role": {
-            "post": {
+            "put": {
                 "security": [
                     {
                         "BearerAuth": []
@@ -112,7 +112,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/inputForms.AddUserRoleForm"
+                            "$ref": "#/definitions/inputForms.AddUserRoleInput"
                         }
                     }
                 ],
@@ -158,6 +158,53 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/inputForms.DeleteUserRole"
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/outputForms.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/outputForms.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/info": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Получение данных о пользователе, запрос без параметров вернёт данные о текущем пользователе",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "UserId",
+                        "name": "id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -252,15 +299,18 @@ const docTemplate = `{
                 }
             }
         },
-        "inputForms.AddUserRoleForm": {
+        "inputForms.AddUserRoleInput": {
             "type": "object",
             "required": [
-                "role_id",
+                "roles",
                 "user_id"
             ],
             "properties": {
-                "role_id": {
-                    "type": "integer"
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "user_id": {
                     "type": "integer"
@@ -270,12 +320,12 @@ const docTemplate = `{
         "inputForms.DeleteUserRole": {
             "type": "object",
             "required": [
-                "role_id",
+                "role_name",
                 "user_id"
             ],
             "properties": {
-                "role_id": {
-                    "type": "integer"
+                "role_name": {
+                    "type": "string"
                 },
                 "user_id": {
                     "type": "integer"
@@ -285,25 +335,25 @@ const docTemplate = `{
         "inputForms.SignUpUserForm": {
             "type": "object",
             "required": [
+                "email",
                 "first_name",
                 "password",
-                "phone",
                 "second_name"
             ],
             "properties": {
+                "email": {
+                    "type": "string"
+                },
                 "first_name": {
                     "type": "string"
                 },
                 "password": {
                     "type": "string"
                 },
-                "phone": {
-                    "type": "string"
-                },
-                "roles_ids": {
+                "roles_names": {
                     "type": "array",
                     "items": {
-                        "type": "integer"
+                        "type": "string"
                     }
                 },
                 "second_name": {
@@ -314,19 +364,7 @@ const docTemplate = `{
         "models.Role": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "deletedAt": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
-                "id": {
-                    "type": "integer"
-                },
                 "name": {
-                    "type": "string"
-                },
-                "updatedAt": {
                     "type": "string"
                 }
             }

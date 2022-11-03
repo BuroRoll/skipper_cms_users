@@ -3,6 +3,8 @@ package handlers
 import (
 	"Skipper_cms_users/pkg/models"
 	"errors"
+	"fmt"
+	"github.com/casbin/casbin"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"net/http"
@@ -58,24 +60,8 @@ func (h *Handler) userIdentity(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	accessRoles := []string{"super_admin"}
-
-	isAccess := false
-	for _, value := range userRoles {
-		for _, accessRole := range accessRoles {
-			if value.Name == accessRole {
-				isAccess = true
-			}
-		}
-	}
-	if isAccess {
-		c.Set(userCtx, userId)
-		c.Set(rolesCtx, userRoles)
-	} else {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Ошибка доступа"})
-		c.Abort()
-		return
-	}
+	c.Set(userCtx, userId)
+	c.Set(rolesCtx, userRoles)
 }
 
 type tokenClaims struct {
@@ -103,4 +89,34 @@ func ParseToken(accessToken string) (uint, []models.Role, error) {
 		return 0, nil, errors.New("token claims are not of type *tokenClaims")
 	}
 	return claims.UserId, claims.Roles, nil
+}
+
+func Authorize(obj string, act string, h *Handler) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		header := c.GetHeader(authorizationHeader)
+		headerParts := strings.Split(header, " ")
+		userId, _, _ := ParseToken(headerParts[1])
+		userRoles, _ := h.services.GetUserRoles(userId)
+		isAccess := false
+		for _, j := range userRoles {
+			isAccess, _ = enforce(j.Name, obj, act)
+			if isAccess {
+				break
+			}
+		}
+		if !isAccess {
+			c.AbortWithStatusJSON(403, "forbidden")
+			return
+		}
+		c.Next()
+	}
+}
+func enforce(sub string, obj string, act string) (bool, error) {
+	enforcer := casbin.NewEnforcer("./pkg/config/auth_model.conf", "./pkg/config/policy.csv")
+	err := enforcer.LoadPolicy()
+	if err != nil {
+		return false, fmt.Errorf("failed to load policy from DB: %w", err)
+	}
+	ok := enforcer.Enforce(sub, obj, act)
+	return ok, nil
 }

@@ -5,6 +5,7 @@ import (
 	"Skipper_cms_users/pkg/models/forms/outputForms"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
 // @Description Получение списка всех пользователей
@@ -50,23 +51,23 @@ func (h *Handler) getRoles(c *gin.Context) {
 // @Security BearerAuth
 // @Accept 		json
 // @Produce 	json
-// @Param 		request 	body 		inputForms.AddUserRoleForm	true 	"query params"
+// @Param 		request 	body 		inputForms.AddUserRoleInput	true 	"query params"
 // @Success 	200 		{object} 	outputForms.SuccessResponse
 // @Failure     500         {object}  	outputForms.ErrorResponse
-// @Router /users/add-role [post]
+// @Router /users/add-role [put]
 func (h *Handler) addRoleToUser(c *gin.Context) {
-	var params inputForms.AddUserRoleForm
+	var params inputForms.AddUserRoleInput
 	if err := c.BindJSON(&params); err != nil {
 		c.JSON(http.StatusBadRequest, outputForms.ErrorResponse{Error: "Неверная форма запроса"})
 	}
-	err := h.services.AddRoleToUser(params.UserId, params.RoleId)
+	user, err := h.services.AddRoleToUser(params.UserId, params.Roles)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, outputForms.ErrorResponse{
 			Error: "Ошибка добавления данных",
 		})
 		return
 	}
-	c.JSON(http.StatusOK, outputForms.SuccessResponse{Status: "ok"})
+	c.JSON(http.StatusOK, user)
 }
 
 // @Description Регистрация нового пользователя
@@ -122,11 +123,35 @@ func (h *Handler) deleteUserRole(c *gin.Context) {
 		})
 		return
 	}
-	user, err := h.services.DeleteUserRole(input.UserId, input.RoleId)
+	user, err := h.services.DeleteUserRole(input.UserId, input.RoleName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, outputForms.ErrorResponse{
 			Error: err.Error(),
 		})
+		return
+	}
+	c.JSON(http.StatusOK, user)
+}
+
+// @Description Получение данных о пользователе, запрос без параметров вернёт данные о текущем пользователе
+// @Tags 		Users
+// @Security  	BearerAuth
+// @Accept 		json
+// @Produce 	json
+// @Param        id   		query     	int  	false  "UserId"
+// @Success 	200 		{object} 	models.User
+// @Failure     400         {object}  	outputForms.ErrorResponse
+// @Failure     500         {object}  	outputForms.ErrorResponse
+// @Router /users/info [get]
+func (h *Handler) getUserInfo(c *gin.Context) {
+	userIdInput, _ := strconv.ParseUint(c.Request.URL.Query().Get("id"), 10, 64)
+	userId := uint(userIdInput)
+	if userId == 0 {
+		userId = c.GetUint(userCtx)
+	}
+	user, err := h.services.GetUser(userId)
+	if err != nil {
+		c.JSON(http.StatusNotFound, outputForms.ErrorResponse{Error: "Пользователь не найден"})
 		return
 	}
 	c.JSON(http.StatusOK, user)

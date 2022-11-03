@@ -7,57 +7,51 @@ definitions:
         description: Valid is true if Time is not NULL
         type: boolean
     type: object
-  inputForms.AddUserRoleForm:
+  inputForms.AddUserRoleInput:
     properties:
-      role_id:
-        type: integer
+      roles:
+        items:
+          type: string
+        type: array
       user_id:
         type: integer
     required:
-    - role_id
+    - roles
     - user_id
     type: object
   inputForms.DeleteUserRole:
     properties:
-      role_id:
-        type: integer
+      role_name:
+        type: string
       user_id:
         type: integer
     required:
-    - role_id
+    - role_name
     - user_id
     type: object
   inputForms.SignUpUserForm:
     properties:
+      email:
+        type: string
       first_name:
         type: string
       password:
         type: string
-      phone:
-        type: string
-      roles_ids:
+      roles_names:
         items:
-          type: integer
+          type: string
         type: array
       second_name:
         type: string
     required:
+    - email
     - first_name
     - password
-    - phone
     - second_name
     type: object
   models.Role:
     properties:
-      createdAt:
-        type: string
-      deletedAt:
-        $ref: '#/definitions/gorm.DeletedAt'
-      id:
-        type: integer
       name:
-        type: string
-      updatedAt:
         type: string
     type: object
   models.User:
@@ -154,7 +148,7 @@ paths:
       tags:
       - Users
   /users/add-role:
-    post:
+    put:
       consumes:
       - application/json
       description: Добавление роли сотруднику
@@ -164,7 +158,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/inputForms.AddUserRoleForm'
+          $ref: '#/definitions/inputForms.AddUserRoleInput'
       produces:
       - application/json
       responses:
@@ -192,6 +186,36 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/inputForms.DeleteUserRole'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/outputForms.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/outputForms.ErrorResponse'
+      security:
+      - BearerAuth: []
+      tags:
+      - Users
+  /users/info:
+    get:
+      consumes:
+      - application/json
+      description: Получение данных о пользователе, запрос без параметров вернёт данные
+        о текущем пользователе
+      parameters:
+      - description: UserId
+        in: query
+        name: id
+        type: integer
       produces:
       - application/json
       responses:

@@ -24,14 +24,17 @@ func (h *Handler) InitRoutes() {
 	{
 		users := api_v1.Group("/users")
 		{
-			users.GET("/", h.getUsers)
-			users.POST("/add-role", h.addRoleToUser)
-			users.POST("/register", h.registerUser)
-			users.DELETE("/delete-role", h.deleteUserRole)
+			users.GET("/", Authorize("/", "read", h), h.getUsers)
+			users.GET("/info", Authorize("/info", "read", h), h.getUserInfo)
+
+			users.POST("/register", Authorize("/register", "write", h), h.registerUser)
+
+			users.PUT("/add-role", Authorize("/add-role", "write", h), h.addRoleToUser)
+			users.DELETE("/delete-role", Authorize("/delete-role", "delete", h), h.deleteUserRole)
 		}
 		roles := api_v1.Group("/roles")
 		{
-			roles.GET("/", h.getRoles)
+			roles.GET("/", Authorize("/roles", "read", h), h.getRoles)
 		}
 	}
 	docs.SwaggerInfo.BasePath = "/api/v1"

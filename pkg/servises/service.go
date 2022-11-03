@@ -8,11 +8,12 @@ import (
 
 type Users interface {
 	GetUsers() ([]models.User, error)
+	GetUser(userId uint) (models.User, error)
 	GetRoles() ([]models.Role, error)
 	GetUserRoles(userId uint) ([]models.Role, error)
-	AddRoleToUser(userId uint, roleId uint) error
+	AddRoleToUser(userId uint, roleId []string) (models.User, error)
 	CreateUser(userData inputForms.SignUpUserForm) (models.User, error)
-	DeleteUserRole(userId uint, roleId uint) (models.User, error)
+	DeleteUserRole(userId uint, roleName string) (models.User, error)
 }
 
 type Service struct {

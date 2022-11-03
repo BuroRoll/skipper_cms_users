@@ -22,10 +22,6 @@ func init() {
 		log.Fatalf("error %s", err)
 	}
 	cmsDb = conn
-	err = cmsDb.AutoMigrate(
-		&Role{},
-		&User{},
-	)
 
 	if err != nil {
 		log.Fatalf(err.Error())

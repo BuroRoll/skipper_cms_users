@@ -31,21 +31,15 @@ func (u UsersPostgres) GetUser(userId uint) (models.User, error) {
 	return user, err.Error
 }
 
-func (u UsersPostgres) GetRole(roleId uint) (models.Role, error) {
-	var role models.Role
-	err := u.db.First(&role, roleId)
-	return role, err.Error
-}
-
 func (u UsersPostgres) AddRoleToUser(user models.User, role models.Role) error {
 	err := u.db.Model(&user).Association("Role").Append(&role)
 	return err
 }
 
-func (u UsersPostgres) CreateUser(firstName string, secondName string, phone string, password string) (models.User, error) {
+func (u UsersPostgres) CreateUser(firstName string, secondName string, email string, password string) (models.User, error) {
 	var user models.User
 	user = models.User{
-		Phone:      phone,
+		Email:      email,
 		FirstName:  firstName,
 		SecondName: secondName,
 		Password:   password,
@@ -59,4 +53,10 @@ func (u UsersPostgres) CreateUser(firstName string, secondName string, phone str
 
 func (u UsersPostgres) DeleteUserRole(user models.User, role models.Role) error {
 	return u.db.Model(&user).Association("Role").Delete(&role)
+}
+
+func (u UsersPostgres) GetRoleByName(roleName string) (models.Role, error) {
+	var role models.Role
+	err := u.db.First(&role, "name = ?", roleName)
+	return role, err.Error
 }

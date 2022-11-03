@@ -9,9 +9,9 @@ type Users interface {
 	GetUsers() ([]models.User, error)
 	GetRoles() ([]models.Role, error)
 	GetUser(userId uint) (models.User, error)
-	GetRole(roleId uint) (models.Role, error)
+	GetRoleByName(roleName string) (models.Role, error)
 	AddRoleToUser(user models.User, role models.Role) error
-	CreateUser(firstName string, secondName string, phone string, password string) (models.User, error)
+	CreateUser(firstName string, secondName string, email string, password string) (models.User, error)
 	DeleteUserRole(user models.User, role models.Role) error
 }
 

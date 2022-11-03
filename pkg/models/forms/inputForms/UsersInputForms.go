@@ -1,19 +1,23 @@
 package inputForms
 
-type AddUserRoleForm struct {
-	UserId uint `json:"user_id" binding:"required"`
-	RoleId uint `json:"role_id" binding:"required"`
+type AddUserRoleInput struct {
+	UserId uint     `json:"user_id" binding:"required"`
+	Roles  []string `json:"roles" binding:"required"`
 }
 
 type SignUpUserForm struct {
-	Phone      string `json:"phone" binding:"required"`
-	Password   string `json:"password" binding:"required"`
-	FirstName  string `json:"first_name" binding:"required"`
-	SecondName string `json:"second_name" binding:"required"`
-	RolesIds   []uint `json:"roles_ids"`
+	Email      string   `json:"email" binding:"required"`
+	Password   string   `json:"password" binding:"required"`
+	FirstName  string   `json:"first_name" binding:"required"`
+	SecondName string   `json:"second_name" binding:"required"`
+	RolesNames []string `json:"roles_names"`
 }
 
 type DeleteUserRole struct {
-	UserId uint `json:"user_id" binding:"required"`
-	RoleId uint `json:"role_id" binding:"required"`
+	UserId   uint   `json:"user_id" binding:"required"`
+	RoleName string `json:"role_name" binding:"required"`
+}
+
+type UserInfoInput struct {
+	UserId uint `json:"user_id"`
 }
