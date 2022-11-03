@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"net/http"
+	"path/filepath"
 	"strings"
 )
 
@@ -112,8 +113,12 @@ func Authorize(obj string, act string, h *Handler) gin.HandlerFunc {
 	}
 }
 func enforce(sub string, obj string, act string) (bool, error) {
-	enforcer := casbin.NewEnforcer("./pkg/config/auth_model.conf", "./pkg/config/policy.csv")
-	err := enforcer.LoadPolicy()
+	authModel := "./pkg/config/auth_model.conf"
+	policy := "./pkg/config/policy.csv"
+	absAuthModel, err := filepath.Abs(authModel)
+	absPolicy, err := filepath.Abs(policy)
+	enforcer := casbin.NewEnforcer(absAuthModel, absPolicy)
+	err = enforcer.LoadPolicy()
 	if err != nil {
 		return false, fmt.Errorf("failed to load policy from DB: %w", err)
 	}
