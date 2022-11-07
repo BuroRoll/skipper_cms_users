@@ -15,7 +15,7 @@ import (
 // @Produce 	json
 // @Success 	200 		{object} 	[]models.User
 // @Failure     500         {object}  	outputForms.ErrorResponse
-// @Router /users [get]
+// @Router /users/ [get]
 func (h *Handler) getUsers(c *gin.Context) {
 	users, err := h.services.GetUsers()
 	if err != nil {
@@ -34,7 +34,7 @@ func (h *Handler) getUsers(c *gin.Context) {
 // @Produce 	json
 // @Success 	200 		{object} 	[]models.Role
 // @Failure     500         {object}  	outputForms.ErrorResponse
-// @Router /roles [get]
+// @Router /roles/ [get]
 func (h *Handler) getRoles(c *gin.Context) {
 	roles, err := h.services.GetRoles()
 	if err != nil {
@@ -52,7 +52,7 @@ func (h *Handler) getRoles(c *gin.Context) {
 // @Accept 		json
 // @Produce 	json
 // @Param 		request 	body 		inputForms.AddUserRoleInput	true 	"query params"
-// @Success 	200 		{object} 	outputForms.SuccessResponse
+// @Success 	200 		{object} 	models.User
 // @Failure     500         {object}  	outputForms.ErrorResponse
 // @Router /users/add-role [put]
 func (h *Handler) addRoleToUser(c *gin.Context) {
@@ -75,14 +75,14 @@ func (h *Handler) addRoleToUser(c *gin.Context) {
 // @Security  	BearerAuth
 // @Accept 		json
 // @Produce 	json
-// @Param 		request 	body 		inputForms.SignUpUserForm 	true 	"query params"
+// @Param 		request 	body 		inputForms.SignUpUserInput 	true 	"query params"
 // @Success 	200 		{object} 	models.User
 // @Failure     400         {object}  	outputForms.ErrorResponse
 // @Failure     206         {object}  	outputForms.ErrorAssignRole
 // @Failure     500         {object}  	outputForms.ErrorResponse
 // @Router /users/register [post]
 func (h *Handler) registerUser(c *gin.Context) {
-	var input inputForms.SignUpUserForm
+	var input inputForms.SignUpUserInput
 	if err := c.BindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, outputForms.ErrorResponse{
 			Error: "Неверная форма регистрации",
@@ -110,13 +110,13 @@ func (h *Handler) registerUser(c *gin.Context) {
 // @Security  	BearerAuth
 // @Accept 		json
 // @Produce 	json
-// @Param 		request 	body 		inputForms.DeleteUserRole 	true 	"query params"
+// @Param 		request 	body 		inputForms.DeleteUserRoleInput 	true 	"query params"
 // @Success 	200 		{object} 	models.User
 // @Failure     400         {object}  	outputForms.ErrorResponse
 // @Failure     500         {object}  	outputForms.ErrorResponse
 // @Router /users/delete-role [delete]
 func (h *Handler) deleteUserRole(c *gin.Context) {
-	var input inputForms.DeleteUserRole
+	var input inputForms.DeleteUserRoleInput
 	if err := c.BindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, outputForms.ErrorResponse{
 			Error: "Неверная форма для удаления роли",
@@ -155,4 +155,33 @@ func (h *Handler) getUserInfo(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, user)
+}
+
+// @Description Смена пароля
+// @Tags 		Users
+// @Security  	BearerAuth
+// @Accept 		json
+// @Produce 	json
+// @Param 		request 	body 		inputForms.PasswordChangeInput 	true 	"query params"
+// @Success 	200 		{object} 	outputForms.SuccessResponse
+// @Failure     400         {object}  	outputForms.ErrorResponse
+// @Failure     500         {object}  	outputForms.ErrorResponse
+// @Router /password/change [put]
+func (h *Handler) changePassword(c *gin.Context) {
+	userId := c.GetUint(userCtx)
+	var input inputForms.PasswordChangeInput
+	if err := c.BindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, outputForms.ErrorResponse{
+			Error: "Неверная форма данных",
+		})
+		return
+	}
+	err := h.services.ChangePassword(userId, input.OldPassword, input.NewPassword)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, outputForms.ErrorResponse{
+			Error: err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, outputForms.SuccessResponse{Status: "Пароль успешно обновлён"})
 }

@@ -50,7 +50,7 @@ func (u UsersService) AddRoleToUser(userId uint, roles []string) (models.User, e
 	return user, nil
 }
 
-func (u UsersService) CreateUser(userData inputForms.SignUpUserForm) (models.User, error) {
+func (u UsersService) CreateUser(userData inputForms.SignUpUserInput) (models.User, error) {
 	user, err := u.repo.CreateUser(userData.FirstName, userData.SecondName, userData.Email, generatePasswordHash(userData.Password))
 	if err != nil {
 		return models.User{}, err
@@ -85,6 +85,17 @@ func (u UsersService) DeleteUserRole(userId uint, roleName string) (models.User,
 	return user, err
 }
 
+func (u UsersService) ChangePassword(userId uint, oldPassword string, newPassword string) error {
+	hashPassword := generatePasswordHash(oldPassword)
+	user, _ := u.repo.GetUser(userId)
+	if user.Password != hashPassword {
+		return errors.New("Неверный старый пароль")
+	}
+	newHashPassword := generatePasswordHash(newPassword)
+	err := u.repo.ChangePassword(user, newHashPassword)
+	return err
+}
+
 func (u UsersService) GetUser(userId uint) (models.User, error) {
 	return u.repo.GetUser(userId)
 }
@@ -92,6 +103,5 @@ func (u UsersService) GetUser(userId uint) (models.User, error) {
 func generatePasswordHash(password string) string {
 	hash := sha256.New()
 	hash.Write([]byte(password))
-
 	return fmt.Sprintf("%x", hash.Sum([]byte(salt)))
 }

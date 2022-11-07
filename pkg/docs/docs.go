@@ -16,7 +16,57 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/roles": {
+        "/password/change": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Смена пароля",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "parameters": [
+                    {
+                        "description": "query params",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/inputForms.PasswordChangeInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/outputForms.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/outputForms.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/outputForms.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/roles/": {
             "get": {
                 "security": [
                     {
@@ -52,7 +102,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users": {
+        "/users/": {
             "get": {
                 "security": [
                     {
@@ -120,7 +170,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/outputForms.SuccessResponse"
+                            "$ref": "#/definitions/models.User"
                         }
                     },
                     "500": {
@@ -156,7 +206,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/inputForms.DeleteUserRole"
+                            "$ref": "#/definitions/inputForms.DeleteUserRoleInput"
                         }
                     }
                 ],
@@ -253,7 +303,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/inputForms.SignUpUserForm"
+                            "$ref": "#/definitions/inputForms.SignUpUserInput"
                         }
                     }
                 ],
@@ -317,7 +367,7 @@ const docTemplate = `{
                 }
             }
         },
-        "inputForms.DeleteUserRole": {
+        "inputForms.DeleteUserRoleInput": {
             "type": "object",
             "required": [
                 "role_name",
@@ -332,7 +382,22 @@ const docTemplate = `{
                 }
             }
         },
-        "inputForms.SignUpUserForm": {
+        "inputForms.PasswordChangeInput": {
+            "type": "object",
+            "required": [
+                "new_password",
+                "old_password"
+            ],
+            "properties": {
+                "new_password": {
+                    "type": "string"
+                },
+                "old_password": {
+                    "type": "string"
+                }
+            }
+        },
+        "inputForms.SignUpUserInput": {
             "type": "object",
             "required": [
                 "email",

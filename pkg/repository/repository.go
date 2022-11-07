@@ -13,6 +13,7 @@ type Users interface {
 	AddRoleToUser(user models.User, role models.Role) error
 	CreateUser(firstName string, secondName string, email string, password string) (models.User, error)
 	DeleteUserRole(user models.User, role models.Role) error
+	ChangePassword(user models.User, newPassword string) error
 }
 
 type Repository struct {

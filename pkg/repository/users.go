@@ -60,3 +60,8 @@ func (u UsersPostgres) GetRoleByName(roleName string) (models.Role, error) {
 	err := u.db.First(&role, "name = ?", roleName)
 	return role, err.Error
 }
+
+func (u UsersPostgres) ChangePassword(user models.User, newPassword string) error {
+	err := u.db.Model(&user).Update("password", newPassword)
+	return err.Error
+}

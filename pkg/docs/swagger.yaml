@@ -19,7 +19,7 @@ definitions:
     - roles
     - user_id
     type: object
-  inputForms.DeleteUserRole:
+  inputForms.DeleteUserRoleInput:
     properties:
       role_name:
         type: string
@@ -29,7 +29,17 @@ definitions:
     - role_name
     - user_id
     type: object
-  inputForms.SignUpUserForm:
+  inputForms.PasswordChangeInput:
+    properties:
+      new_password:
+        type: string
+      old_password:
+        type: string
+    required:
+    - new_password
+    - old_password
+    type: object
+  inputForms.SignUpUserInput:
     properties:
       email:
         type: string
@@ -103,7 +113,38 @@ info:
   title: Users service
   version: "1.0"
 paths:
-  /roles:
+  /password/change:
+    put:
+      consumes:
+      - application/json
+      description: Смена пароля
+      parameters:
+      - description: query params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/inputForms.PasswordChangeInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/outputForms.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/outputForms.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/outputForms.ErrorResponse'
+      security:
+      - BearerAuth: []
+      tags:
+      - Users
+  /roles/:
     get:
       consumes:
       - application/json
@@ -125,7 +166,7 @@ paths:
       - BearerAuth: []
       tags:
       - Users
-  /users:
+  /users/:
     get:
       consumes:
       - application/json
@@ -165,7 +206,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/outputForms.SuccessResponse'
+            $ref: '#/definitions/models.User'
         "500":
           description: Internal Server Error
           schema:
@@ -185,7 +226,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/inputForms.DeleteUserRole'
+          $ref: '#/definitions/inputForms.DeleteUserRoleInput'
       produces:
       - application/json
       responses:
@@ -246,7 +287,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/inputForms.SignUpUserForm'
+          $ref: '#/definitions/inputForms.SignUpUserInput'
       produces:
       - application/json
       responses:
